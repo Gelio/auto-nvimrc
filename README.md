@@ -12,7 +12,7 @@ Prompts the user to trust the files before executing them.
 {
     "Gelio/auto-nvimrc",
     config = function()
-        local auto_nvimrc = require("auto_nvimrc")
+        local auto_nvimrc = require("auto-nvimrc")
         auto_nvimrc.execute_nvimrcs()
 
         vim.api.nvim_create_user_command("AutoNvimrcReset", function()
