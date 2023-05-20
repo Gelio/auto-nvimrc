@@ -1,20 +1,18 @@
 local M = {}
 
-local Path = require("plenary.path")
-
----@param nvimrc_path Path
+---@param nvimrc_path string[]
 local function maybe_execute_nvimrc(nvimrc_path)
-	local file_content = vim.secure.read(nvimrc_path:absolute())
+	local file_content = vim.secure.read(nvimrc_path)
 
 	if file_content == nil then
 		-- The user did not trust the file. Ignoring
 		return
 	end
 
-	vim.cmd("source " .. nvimrc_path:absolute())
+	vim.cmd("source " .. nvimrc_path)
 end
 
----@return Path[]
+---@return string[]
 local function get_nvimrcs()
 	---@type string[]
 	local nvimrcs = vim.fn.findfile(".nvimrc", ".;", -1)
@@ -23,7 +21,9 @@ local function get_nvimrcs()
 
 	local combined_nvimrcs = vim.list_extend(nvimrcs, lua_nvimrcs)
 
-	return vim.tbl_map(Path.new, combined_nvimrcs)
+	return vim.tbl_map(function(nvimrc)
+		return vim.fn.fnamemodify(nvimrc, ":p")
+	end, combined_nvimrcs)
 end
 
 --- Resets the trust information about nvimrcs
@@ -34,7 +34,7 @@ function M.reset()
 	for _, nvimrc_path in ipairs(nvimrcs) do
 		vim.secure.trust({
 			action = "remove",
-			path = nvimrc_path:absolute(),
+			path = nvimrc_path,
 		})
 
 		maybe_execute_nvimrc(nvimrc_path)
